@@ -44,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center glow">
                 <Icon name="Sword" size={24} className="text-primary-foreground" />
               </div>
-              <h1 className="text-2xl font-bold glow-text">RPG Форум</h1>
+              <h1 className="text-2xl font-bold glow-text">Donaters Family</h1>
             </Link>
 
             <nav className="hidden md:flex items-center gap-6">
@@ -108,7 +108,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <h3 className="font-bold mb-3 text-primary">RPG Форум</h3>
+              <h3 className="font-bold mb-3 text-primary">Donaters Family</h3>
               <p className="text-sm text-muted-foreground">
                 Портал для любителей ролевых игр
               </p>
@@ -133,7 +133,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-            © 2025 RPG Форум. Все права защищены.
+            © 2025 Donaters Family. Все права защищены.
           </div>
         </div>
       </footer>
