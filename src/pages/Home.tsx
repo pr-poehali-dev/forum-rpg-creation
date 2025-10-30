@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,9 +25,12 @@ interface Topic {
 const API_URL = 'https://functions.poehali.dev/328c3058-ab64-4ab9-8b8f-877651fd3d3a';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -76,6 +80,39 @@ export default function Home() {
       toast({
         title: 'Ошибка',
         description: 'Не удалось создать тему',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleEditTopic = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingTopic) return;
+
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get('title') as string;
+    const category = formData.get('category') as string;
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingTopic.id, title, category }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Успешно',
+          description: 'Тема обновлена!',
+        });
+        setIsEditOpen(false);
+        setEditingTopic(null);
+        loadTopics();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось обновить тему',
         variant: 'destructive',
       });
     }
@@ -171,7 +208,7 @@ export default function Home() {
                 <Card key={topic.id} className="hover:glow transition-all">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 cursor-pointer">
+                      <div className="flex-1 cursor-pointer" onClick={() => navigate(`/topic/${topic.id}`)}>
                         <div className="flex items-center gap-2 mb-2">
                           {topic.isPinned && (
                             <Icon name="Pin" size={16} className="text-accent" />
@@ -202,14 +239,31 @@ export default function Home() {
                           </div>
                           <div className="text-xs">{topic.lastPost}</div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteTopic(topic.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Icon name="Trash2" size={16} />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingTopic(topic);
+                              setIsEditOpen(true);
+                            }}
+                            className="text-primary hover:text-primary"
+                          >
+                            <Icon name="Edit" size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTopic(topic.id);
+                            }}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardHeader>
@@ -269,6 +323,39 @@ export default function Home() {
             </div>
             <Button type="submit" className="w-full glow">
               Создать тему
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl glow-text">Редактировать тему</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditTopic} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Название темы</Label>
+              <Input 
+                id="edit-title" 
+                name="title" 
+                defaultValue={editingTopic?.title}
+                placeholder="Введите название" 
+                required 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-category">Категория</Label>
+              <Input 
+                id="edit-category" 
+                name="category" 
+                defaultValue={editingTopic?.category}
+                placeholder="Например: Фэнтези" 
+                required 
+              />
+            </div>
+            <Button type="submit" className="w-full glow">
+              Сохранить
             </Button>
           </form>
         </DialogContent>

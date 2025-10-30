@@ -5,10 +5,10 @@ from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
-    Business: API для управления темами форума (получение, создание, редактирование, удаление)
+    Business: API для управления комментариями к темам форума
     Args: event - dict с httpMethod, body, queryStringParameters
           context - объект с request_id, function_name
-    Returns: HTTP response dict с темами или статусом операции
+    Returns: HTTP response dict с комментариями или статусом операции
     '''
     method: str = event.get('httpMethod', 'GET')
     
@@ -17,7 +17,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -31,21 +31,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     cur = conn.cursor()
     
     if method == 'GET':
-        cur.execute('SELECT id, title, author, category, replies, views, last_post, is_pinned, created_at FROM topics ORDER BY is_pinned DESC, created_at DESC')
+        params = event.get('queryStringParameters', {})
+        topic_id = params.get('topicId')
+        
+        cur.execute(
+            'SELECT id, topic_id, author, content, created_at FROM comments WHERE topic_id = %s ORDER BY created_at ASC',
+            (topic_id,)
+        )
         rows = cur.fetchall()
         
-        topics = []
+        comments = []
         for row in rows:
-            topics.append({
+            comments.append({
                 'id': row[0],
-                'title': row[1],
+                'topicId': row[1],
                 'author': row[2],
-                'category': row[3],
-                'replies': row[4],
-                'views': row[5],
-                'lastPost': row[6],
-                'isPinned': row[7],
-                'createdAt': row[8].isoformat() if row[8] else None
+                'content': row[3],
+                'createdAt': row[4].isoformat() if row[4] else None
             })
         
         cur.close()
@@ -57,21 +59,27 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'topics': topics}),
+            'body': json.dumps({'comments': comments}),
             'isBase64Encoded': False
         }
     
     if method == 'POST':
         body_data = json.loads(event.get('body', '{}'))
-        title = body_data.get('title')
+        topic_id = body_data.get('topicId')
         author = body_data.get('author')
-        category = body_data.get('category', 'Общее')
+        content = body_data.get('content')
         
         cur.execute(
-            "INSERT INTO topics (title, author, category, replies, views, last_post) VALUES (%s, %s, %s, 0, 0, 'Только что') RETURNING id",
-            (title, author, category)
+            'INSERT INTO comments (topic_id, author, content) VALUES (%s, %s, %s) RETURNING id',
+            (topic_id, author, content)
         )
-        topic_id = cur.fetchone()[0]
+        comment_id = cur.fetchone()[0]
+        
+        cur.execute(
+            'UPDATE topics SET replies = replies + 1, last_post = %s WHERE id = %s',
+            ('Только что', topic_id)
+        )
+        
         conn.commit()
         
         cur.close()
@@ -83,41 +91,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'id': topic_id, 'message': 'Тема создана'}),
-            'isBase64Encoded': False
-        }
-    
-    if method == 'PUT':
-        body_data = json.loads(event.get('body', '{}'))
-        topic_id = body_data.get('id')
-        title = body_data.get('title')
-        category = body_data.get('category')
-        
-        cur.execute(
-            'UPDATE topics SET title = %s, category = %s WHERE id = %s',
-            (title, category, topic_id)
-        )
-        conn.commit()
-        
-        cur.close()
-        conn.close()
-        
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({'message': 'Тема обновлена'}),
+            'body': json.dumps({'id': comment_id, 'message': 'Комментарий добавлен'}),
             'isBase64Encoded': False
         }
     
     if method == 'DELETE':
         params = event.get('queryStringParameters', {})
-        topic_id = params.get('id')
+        comment_id = params.get('id')
         
-        cur.execute('DELETE FROM topics WHERE id = %s', (topic_id,))
-        conn.commit()
+        cur.execute('SELECT topic_id FROM comments WHERE id = %s', (comment_id,))
+        result = cur.fetchone()
+        
+        if result:
+            topic_id = result[0]
+            cur.execute('DELETE FROM comments WHERE id = %s', (comment_id,))
+            cur.execute('UPDATE topics SET replies = GREATEST(replies - 1, 0) WHERE id = %s', (topic_id,))
+            conn.commit()
         
         cur.close()
         conn.close()
@@ -128,7 +117,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'message': 'Тема удалена'}),
+            'body': json.dumps({'message': 'Комментарий удален'}),
             'isBase64Encoded': False
         }
     

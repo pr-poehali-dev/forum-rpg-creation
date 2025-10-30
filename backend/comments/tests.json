@@ -1,0 +1,21 @@
+{
+  "tests": [
+    {
+      "name": "Получение комментариев темы",
+      "method": "GET",
+      "path": "/?topicId=1",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Создание комментария",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "topicId": 1,
+        "author": "TestUser",
+        "content": "Тестовый комментарий"
+      },
+      "expectedStatus": 201
+    }
+  ]
+}
