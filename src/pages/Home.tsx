@@ -273,34 +273,7 @@ export default function Home() {
           )}
         </div>
 
-        <Card className="animate-glow-pulse bg-card/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon name="TrendingUp" size={24} />
-              Статистика портала
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-1">1,234</div>
-                <div className="text-sm text-muted-foreground">Игроков</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-accent mb-1">{topics.length}</div>
-                <div className="text-sm text-muted-foreground">Активных тем</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-secondary mb-1">89</div>
-                <div className="text-sm text-muted-foreground">Миров</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-1">45,678</div>
-                <div className="text-sm text-muted-foreground">Сообщений</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
       </div>
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
