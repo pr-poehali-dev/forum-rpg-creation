@@ -77,9 +77,9 @@ export default function Home() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4 glow-text">Добро пожаловать в портал РП</h1>
+          <h1 className="text-5xl font-bold mb-4 glow-text">Добро пожаловать в семью</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Создавай истории, играй роли, исследуй новые миры
+            Ты попал на сайт нашей семьи, здесь ты сможешь найти все что тебе нужно. Оставайся с нами, тут интересно
           </p>
         </div>
 
