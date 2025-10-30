@@ -75,15 +75,26 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4 glow-text">Добро пожаловать в семью</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Ты попал на сайт нашей семьи, здесь ты сможешь найти все что тебе нужно. Оставайся с нами, тут интересно
-          </p>
+      <div className="relative">
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" 
+          style={{ 
+            backgroundImage: 'url(https://cdn.poehali.dev/projects/c301071b-ceed-4aab-852c-8980330a8796/files/e5e93315-d0af-481f-b9cd-11eb4b98419c.jpg)',
+            filter: 'brightness(0.3)'
+          }}
+        />
+        <div className="relative z-10 container mx-auto px-4 py-24">
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-6xl font-bold mb-6 glow-text">Добро пожаловать в семью</h1>
+            <p className="text-2xl text-foreground max-w-3xl mx-auto leading-relaxed">
+              Ты попал на сайт нашей семьи, здесь ты сможешь найти все что тебе нужно. Оставайся с нами, тут интересно
+            </p>
+          </div>
         </div>
+      </div>
+      <div className="container mx-auto px-4 py-8">
 
-        <div className="mb-8">
+        <div className="mb-8 animate-slide-up">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Icon name="MessageSquare" size={24} />
@@ -101,7 +112,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 animate-fade-in">
             {filteredTopics.map((topic) => (
               <Card key={topic.id} className="hover:glow transition-all cursor-pointer">
                 <CardHeader>
@@ -143,7 +154,7 @@ export default function Home() {
           </div>
         </div>
 
-        <Card className="glow bg-card/50">
+        <Card className="animate-glow-pulse bg-card/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Icon name="TrendingUp" size={24} />
