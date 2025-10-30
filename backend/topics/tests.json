@@ -1,0 +1,21 @@
+{
+  "tests": [
+    {
+      "name": "Получение списка тем",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Создание новой темы",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "title": "Тестовая тема",
+        "author": "TestUser",
+        "category": "Тест"
+      },
+      "expectedStatus": 201
+    }
+  ]
+}
